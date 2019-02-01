@@ -35,7 +35,7 @@ Mucha gente aún sigue creyendo que la concurrencia implica necesariamente más 
 Fíjate en el siguiente gráfico:
 
  <p align="center"> 
-    <img src="./src/images/concurrency_es.png" alt="Gráfico Thread vs Multi Thread">
+    <img src="./src/images/concurrency_es.png" width="700" alt="Gráfico Thread vs Multi Thread">
  </p>
 
 - **Escenario 1**: no es ni concurrente ni paralelo. Es simplemente una ejecución secuencial, primero una tarea, después la siguiente.
