@@ -155,7 +155,11 @@ Lo más probable es que un cuello de botella se produzca como consecuencia de un
 
 <strong id="f2">2</strong> *El loop de eventos que aquí se explica es un modelo teórico. La implementación real en navegadores y motores de Javascript está muy optimizada y podría ser distinta.* [↩](#a2)
 ## Nota breve sobre Paralelismo
-lorem
+Aunque Javascript ha sido concebido con las operaciones de entrada/salida en mente, no significa que no pueda ejecutar tareas de procesado intesivo. Por supuesto que puede hacerlo, pero si no se manejan adecuadamente, podría dar lugar a los problemas mencionados en el apartado anterior.
+
+Se ha invertido un considerable esfuerzo ultimamente para minimizar estos problemas. Como resultado, entidades como los [WebWorkers](https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API) y los [SharedArrayBuffer](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/SharedArrayBuffer) han visto la luz recientemente para introducir el paralelismo en Javascript. Si necesitas ejecutar tareas pesadas que hagan un uso intensivo de CPU deberías considerar el uso de *WebWorkers* que corran en segundo plano consumiendo *threads* distintos al principal.
+
+
 # Patrones Asíncronos en Javascript
 lorem
 ## Callbacks
