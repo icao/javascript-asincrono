@@ -35,7 +35,7 @@ Mucha gente aún sigue creyendo que la concurrencia implica necesariamente más 
 Fíjate en el siguiente gráfico:
 
  <p align="center"> 
-    <img src="./src/images/concurrency_es.png" width="700" alt="Gráfico Thread vs Multi Thread">
+    <img src="./src/images/concurrency_es.png" width="850" alt="Gráfico Thread vs Multi Thread">
  </p>
 
 - **Escenario 1**: no es ni concurrente ni paralelo. Es simplemente una ejecución secuencial, primero una tarea, después la siguiente.
@@ -49,7 +49,7 @@ Hasta ahora, en los ejemplos anteriores hemos visto tareas que consumían recurs
 Sin embargo, es frecuente encontrar otro tipo de operaciones en nuestros programas, por ejemplo: leer un fichero en disco, acceder a una base de datos externa o consultar datos a través de la red. Todas estas operaciones de entrada/salida disparan peticiones especiales que son *atendidas fuera del contexto de nuestra aplicación*. Por ejemplo, desde nuestro programa se ordena la lectura de un fichero en disco, pero es el sistema operativo y el propio disco los involucrados en completar esta petición. Por lo tanto, las operaciones ***I/O-bound*** (limitadas por entrada/salida) no corren o se ejecutan en el dominio de nuestra aplicación. <sup id="a1">[1](#f1)</sup>
 
 <p align="center"> 
-    <img src="./src/images/cpu_io_es.png" width="700" alt="Gráfico CPU-Bound vs. I/O-Bound">
+    <img src="./src/images/cpu_io_es.png" width="850" alt="Gráfico CPU-Bound vs. I/O-Bound">
 </p>
  
  Cuando decimos que una operación esta limitada por algo, se desprende que existe un cuello de botella con el recurso que la limita. De este modo, si incrementamos la potencia de nuestra CPU, mejoraremos el rendimiento de las operaciones ***CPU-bound***, mientras que una mejora en el sistema de entrada/salida favorecerá el desempeño de las operaciones ***I/O-bound***.
@@ -71,7 +71,7 @@ Bloqueante vs No-bloqueante hace referencia a como la fase de espera afecta a nu
 - **No Bloqueante**: Una llamada no bloqueante devuelve inmediatamente con independencia del resultado. En caso de que se haya completado, devolverá los datos solicitados. En caso contrario (si la operación no ha podido ser satisfecha) podría devolver un código de error indicando algo así como *'Temporalmente no disponible'*, *'No estoy listo'* o *'En este momento la llamada sería bloqueante. Por favor, posponga la llamada'*. En este caso se sobreentiende que algún tipo de *polling* debería hacerse para completar el trabajo o para lanzar una nueva petición más tarde, en un mejor momento.
 
  <p align="center"> 
-    <img src="./src/images/blocking_non_blocking_es.png" width="700" alt="Gráfico Bloqueante vs No Bloqueante">
+    <img src="./src/images/blocking_non_blocking_es.png" width="850" alt="Gráfico Bloqueante vs No Bloqueante">
  </p>
  
  Síncrono vs Asíncrono se refiere a cuando tendrá lugar la respuesta:
@@ -80,7 +80,7 @@ Bloqueante vs No-bloqueante hace referencia a como la fase de espera afecta a nu
  - **Asíncrono**: la finalización de la operación I/O se señaliza más tarde, mediante un mecanismo específico como por ejemplo un *callback*, una promesa o un evento (se explicarán después), lo que hace posible que la respuesta sea procesada en diferido. Como se puede adivinar, su comportamiento es no bloqueante ya que la llamda I/O devuelve inmediatamente.
  
  <p align="center"> 
-    <img src="./src/images/sync_async_es.png" width="700" alt="Gráfico Sincrono vs Asincrono">
+    <img src="./src/images/sync_async_es.png" width="850" alt="Gráfico Sincrono vs Asincrono">
  </p>
  
  Según la clasificación anterior, podemos tener operaciones I/O de tipo:
