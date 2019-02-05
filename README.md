@@ -116,7 +116,7 @@ Gracias a esta solución, Javascript es áltamente concurrente a pesar de emplea
 
  
 ### El Loop de Eventos de Javascript
-¿Cómo se ejecuta un programa en Javascript? ¿Como gestiona nuestra aplicación de forma concurrente las respuestas a las llamadas asíncronas? Eso es exactamente lo que el modelo basado en un loop de eventos<sup id="a1">[2](#f2)</sup> viene a responder:
+¿Cómo se ejecuta un programa en Javascript? ¿Como gestiona nuestra aplicación de forma concurrente las respuestas a las llamadas asíncronas? Eso es exactamente lo que el modelo basado en un loop de eventos<sup id="a2">[2](#f2)</sup> viene a responder:
  <p align="center">
     <img src="./src/images/event_loop_model_es.png" width="850" alt="Gráfico Loop de eventos">
  </p>
@@ -129,7 +129,7 @@ Traducido, pila de llamadas, se encarga de albergar las instrucciones que deben 
  </p>
 
 
-<strong id="f2">2</strong> *El loop de eventos que aquí se explica es un modelo teórico. La implementación real en navegadores y motores de Javascript está muy optimizada y podría ser distinta.* [↩](#a1)
+<strong id="f2">2</strong> *El loop de eventos que aquí se explica es un modelo teórico. La implementación real en navegadores y motores de Javascript está muy optimizada y podría ser distinta.* [↩](#a2)
 ## Nota breve sobre Paralelismo
 lorem
 # Patrones Asíncronos en Javascript
