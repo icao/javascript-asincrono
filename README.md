@@ -58,7 +58,13 @@ Sin embargo, es frecuente encontrar otro tipo de operaciones en nuestros program
  
  [^1]: Como y donde tienen lugar estas operaciones esta fuera del ámbito de esta guia. Sucede a través de APIs implementadas en los navegadores y, en última isntancia, del propio sistema operativo.
 # Naturaleza I/O: Bloqueante vs. No-bloqueante & Síncrono vs. Asíncrono
-lorem
+Esto es un texto con nota al pie <sup>[1](#myfootnote1)</sup>
+
+ Bla bla <sup id="a1">[1](#f1)</sup>
+
+afsdfasdfsafd
+
+
 # El Modelo de Javascript
 lorem
 ## El Loop de Eventos de Javascript
@@ -77,6 +83,10 @@ lorem
 
 
 
+
+<a name="myfootnote1">1</a>: Footnote content goes here *Esto es una nota al pie de página.*
+
+<b id="f1">1</b> Footnote content here. [↩](#a1)
 
 
 
