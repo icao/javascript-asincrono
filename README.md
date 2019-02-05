@@ -82,7 +82,7 @@ Bloqueante vs No-bloqueante hace referencia a como la fase de espera afecta a nu
  <p align="center"> 
     <img src="./src/images/sync_async_es.png" width="850" alt="Gráfico Sincrono vs Asincrono">
  </p>
- 
+  
  Según la clasificación anterior, podemos tener operaciones I/O de tipo:
  
  - **Síncronas y Bloqueantes**. Toda la operación se hace de una vez, bloqueando el flujo de ejecución:
@@ -98,9 +98,38 @@ Bloqueante vs No-bloqueante hace referencia a como la fase de espera afecta a nu
  ---
  
 # El Modelo de Javascript
-lorem
-## El Loop de Eventos de Javascript
-lorem
+Javascript fue diseñado para ser ejecutado en navegadores, trabajar con peticiones sobre la red y procesar las interacciones de usuario, al tiempo que se mantiene una interfaz fluida. Ser bloqueante o síncrono no ayudaría a conseguir estos objetivos, es por ello que Javascript ha evolucionado intencionadamente pensando en operaciones de tipo I/O. Por esta razón:
+
+**Javascript** utiliza un modelo **asíncrono y no bloqueante**, con un ***loop*** **de eventos implementado con un único** ***thread*** para sus interfaces de entrada/salida.
+
+Gracias a esta solución, Javascript es áltamente concurrente a pesar de emplear un único *thread*. Ya conocemos el significado de *asíncrono* y *no bloqueante*, pero ¿qué es el *loop* de eventos? Este mecanismo será explicado en el siguiente capítulo. Antes, a modo de repaso, veamos el aspecto de una operación I/O asíncrona en Javascript:
+
+<p align="center">
+   <img src="./src/images/async_call_es.png" width="850" alt="Gráfico Modelo de JavaScript">
+</p>
+
+ Paso a paso, podría explicarse del siguiente modo:
+ 
+ <p align="center">
+    <img src="./src/images/async_call_steps_es.png" width="850" alt="Gráfico Detallado del Modelo de JavaScript">
+ </p>
+
+ 
+### El Loop de Eventos de Javascript
+¿Cómo se ejecuta un programa en Javascript? ¿Como gestiona nuestra aplicación de forma concurrente las respuestas a las llamadas asíncronas? Eso es exactamente lo que el modelo basado en un loop de eventos<sup id="a1">[2](#f2)</sup> viene a responder:
+ <p align="center">
+    <img src="./src/images/event_loop_model_es.png" width="850" alt="Gráfico Loop de eventos">
+ </p>
+
+
+#### *Call Stack*
+Traducido, pila de llamadas, se encarga de albergar las instrucciones que deben ejecutarse. Nos indica en que punto del programa estamos, por donde vamos. Cada llamada a función de nuestra aplicación, entra a la pila generando un nuevo *frame* (bloque de memoria reservada para los argumentos y variables locales de dicha función). Por tanto, cuando se llama a una función, su *frame* es insertado arriba en la pila, cuando una función se ha completado y devuelve, su frame se saca de la pila también por arriba. El funcionamiento es **LIFO**: ***Last In***, ***First Out***. De este modo, las llamadas a función que están dentro de otra función contenedora son apiladas encima y serán atendidas primero.
+<p align="center">
+    <img src="./src/images/call_stack_animated.gif" width="850" alt="Gráfico Call Stack">
+ </p>
+
+
+<strong id="f2">2</strong> *El loop de eventos que aquí se explica es un modelo teórico. La implementación real en navegadores y motores de Javascript está muy optimizada y podría ser distinta.* [↩](#a1)
 ## Nota breve sobre Paralelismo
 lorem
 # Patrones Asíncronos en Javascript
