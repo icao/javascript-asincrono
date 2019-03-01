@@ -502,10 +502,14 @@ async function wait() {
 Reemplazamos los dos *await* apilados por un `Promise.all()`, al que a su vez esperamos con un único *await* (recuerda que `Promise.all()` devuelve una promesa). De este modo eliminamos elegantemente el riesgo que conlleva usar múltiples *await* e incurrir en una espera secuencial no deseada.
 
 
-
-
-
-
 # Resumen
-
-lorem
+* La concurrencia hace que las tareas progresen simultáneamente. El paralelismo es un caso especial de concurrencia donde las tareas se ejecutan literalmente al mismo tiempo.
+* Estas tareas pueden consumir CPU de forma intensiva. Se las conoce como operaciones *CPU-bound* y llevan código que se ejecuta en nuestra aplicación. Por contra, las operaciones *I/O-bound* no son ejecutadas en el flujo de nuestro programa sino en un contexto externo. Estas operaciones persiguen el acceso a dispositivos o recursos como servidores, bases de datos, ficheros, etc.
+* Las operaciones *I/O-bound* (de entrada/salida) pueden ser bloqueantes o no bloqueantes, en función de si el *thread* queda a la espera o no, y síncronas o asíncronas, según si la ejecución es secuencial o la respuesta puede darse en diferido, en algún momento en el futuro.
+* Javascript está diseñado para aplicaciones web, enfocado hacia operaciones *I/O-bound*. Utiliza un modelo asíncrono y no bloqueante con un *loop* de eventos de un único *thread*.
+* Este modelo permite despachar mensajes asíncronos de forma concurrente, pero cuidado, si no se utiliza convenientemente podemos reducir considerablemente el desempeño de nuestra aplicación. Mantén tus *callbacks* todo lo ligeros que te sea posible.
+* Para aquellas tareas pesadas que requieran un procesamiento intensivo utiliza el paralelismo en Javascript a través de los *WebWorkers*.
+* Los patrones asíncronos más comunes en Javascript son:
+  * *Callback*. Función que se ejecuta cuando una operación asíncrona termina, como resultado de la misma.
+  * Promesa. Representa el resultado de una operación asíncrona. Se configura con dos *callbacks* para resolver la promesa con éxito o con fallo.
+  * *Async/Await*. Azúcar sintáctico para manejar promesas de una forma más simple. *Async* declara una función como asíncrona mientras que await gestiona la resolución de una promesa de forma automática. *Await* debe emplearse siempre dentro de declaraciones *async*. Atento a múltiples *await**, piensa bien el comportamiento que necesitas.
