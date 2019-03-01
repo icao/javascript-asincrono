@@ -30,7 +30,7 @@ Concurrencia y paralelismo son conceptos relacionados pero con un importante mat
 - **Paralelismo:** cuando dos o mas tareas se ejecutan, literalmente, a la vez, en el mismo instante de tiempo.
 Nótese la diferencia: que varias tareas **progresen** simultáneamente no tiene porque significar que sucedan al mismo tiempo. Mientras que la concurrencia aborda un problema más general, el paralelismo es un sub-caso de la concurrencia donde las cosas suceden exactamente al mismo tiempo.
 
-Mucha gente aún sigue creyendo que la concurrencia implica necesariamente más de un *thread*. **Esto no es cierto**. El entrelazado (o multiplexado), por ejemplo, es un mecanismo común para implementar concurrencia en escenarios donde los recursos son limitados. Piensa en cualquier sistema operativo moderno haciendo multitarea con un único core. Simplemente trocea las tareas en tareas más pequeñas y las entrelaza, de modo que cada una de ellas se ejecutará durante un breve instante. Sin embargo, a largo plazo, la impresión es que todas progresan a la vez.
+Mucha gente aún sigue creyendo que la concurrencia implica necesariamente más de un *thread*. **Esto no es cierto**. El entrelazado (o multiplexado), por ejemplo, es un mecanismo común para implementar concurrencia en escenarios donde los recursos son limitados. Piensa en cualquier sistema operativo moderno haciendo multitarea con un único *core*. Simplemente trocea las tareas en tareas más pequeñas y las entrelaza, de modo que cada una de ellas se ejecutará durante un breve instante. Sin embargo, a largo plazo, la impresión es que todas progresan a la vez.
 
 Fíjate en el siguiente gráfico:
 
@@ -100,7 +100,7 @@ Bloqueante vs No-bloqueante hace referencia a como la fase de espera afecta a nu
 # El Modelo de Javascript
 Javascript fue diseñado para ser ejecutado en navegadores, trabajar con peticiones sobre la red y procesar las interacciones de usuario, al tiempo que se mantiene una interfaz fluida. Ser bloqueante o síncrono no ayudaría a conseguir estos objetivos, es por ello que Javascript ha evolucionado intencionadamente pensando en operaciones de tipo I/O. Por esta razón:
 
-**Javascript** utiliza un modelo **asíncrono y no bloqueante**, con un ***loop*** **de eventos implementado con un único** ***thread*** para sus interfaces de entrada/salida.
+>**Javascript** utiliza un modelo **asíncrono y no bloqueante**, con un ***loop*** **de eventos implementado con un único** ***thread*** para sus interfaces de entrada/salida.
 
 Gracias a esta solución, Javascript es áltamente concurrente a pesar de emplear un único *thread*. Ya conocemos el significado de *asíncrono* y *no bloqueante*, pero ¿qué es el *loop* de eventos? Este mecanismo será explicado en el siguiente capítulo. Antes, a modo de repaso, veamos el aspecto de una operación I/O asíncrona en Javascript:
 
@@ -236,7 +236,188 @@ fetch(document.URL.toString())
   .then(result => console.log(result),
     e => console.log(`Error capturado:  ${e}`));
 ```
+En el ejemplo anterior, pedimos al servidor que nos provea una URL utilizando la función asíncrona *fetch* y nos devuelve una promesa. Configuramos la promesa con dos *callbacks*: uno para resolver la promesa, que mostrará la página por consola en caso de éxito, y otro para rechazarla en caso de fallo que mostrará el error asociado.
 
+Una característica interesante de las promesas es que pueden ser encadenadas. Esto es posible gracias a que la llamada `.then()` también devuelve una promesa. Esta nueva promesa devuelta será resuelta con el valor que retorne el *callback* de resolución original (el que hemos pasado al primer `then()`):
+
+```js
+fetch(document.URL.toString())
+  .then(result => {
+    console.log(result);
+    return "Primer Then";
+  },
+    e => console.log(`Error capturado:  ${e}`))
+  .then(result => console.log(`Segundo Then despues de ${result}: La página ya ha debido ser mostrada`),
+    e => console.log(`Error capturado:  ${e}`));
+```
+
+Para evitar verbosidad, podemos encadenar las promesas de un modo mas corto, empleando el método `.catch(rejectCallback)` para catpurar cualquier rechazo que ocurra en cualesquiera de las promesas encadenadas. `.catch(rejectCallback)` es equivalente a `.then(null, rejectCallback)`. Solo se necesita una única sentencia `catch()` al final de una cadena de promesas:
+
+```js
+fetch(document.URL.toString())
+  .then(result => console.log(result))
+  .then(() => console.log(`Fetch completado, página mostrada`))
+  .catch(e => console.log(`Error capturado:  ${e}`));
+```
+
+#### Composición de Promesas
+Es muy frecuente consumir más de una promesa a la vez y habitualmente es deseable que se ejecuten en paralelo. Es decir, lanzamos varias tareas asíncronas al mismo tiempo y recogemos sus correspondientes promesas a la espera de que una, o todas, se resuelvan. Para estos casos contamos con dos herramientas de composición de gran utilidad: `Promise.all()` y `Promise.race()`.
+
+`Promise.all()` acepta un array de promesas y devuelve una nueva promesa cuya resolución se completará con éxito una vez que **todas las promesas originales se hayan resuelto satisfactoriamente**, o en caso de fallo, será rechazada en cuanto una de las promesas originales sea rechazada. Esta promesa compuesta, además, nos devolverá un array con los resultados de cada una de las promesas originales. Veamos un sencillo ejemplo:
+
+```js
+const p1 = fetch("URL1_Aqui");
+const p2 = fetch("URL2_Aqui");
+const p3 = fetch("URL3_Aqui");
+
+Promise.all([p1, p2, p3])
+  .then(resultArray => console.log(resultArray))
+  .catch(e => console.log(`Error capturado:  ${e}`));
+```
+El mecanismo de `Promise.race()` es similar con la diferencia de un pequeño matiz. La promesa compuesta que devuelve `.race()` será resuelta tan pronto como se resuelva alguna de las promesas originales, ya sea con éxito o fallo. De ahí el nombre del método, es una competición, la primera en terminar gana. Puedes comprobar tu mismo con el ejemplo anterior cual de las 3 URLs tarda menos en cargar:
+
+```js
+Promise.race([p1, p2, p3])
+  .then(winnerResult => console.log(winnerResult))
+  .catch(e => console.log(`Error capturado:  ${e}`));
+```
+
+#### Creando Promesas
+Una promesa se crea instanciando un nuevo objeto `Promise`. En el momento de la creación, en el constructor, debemos especificar un *callback* que contenga la carga de la promesa, aquello que la promesa debe hacer. Este *callback* nos provee de dos argumentos: `resolveCallback` y `rejectCallback`. Te suenan, ¿verdad? Son los dos mismos *callbacks* registrados al consumir la promesa. De este modo, depende de ti como desarrollador llamar a `resolveCallback` y `rejectCallback` cuando sea necesario para señalizar que la promesa ha sido completada con éxito o con fallo.
+
+Una plantilla típica para la creación de promesas es la siguiente:
+
+```js
+const myAsyncFunction = () => {
+  return new Promise((resolve, reject) => {
+
+    // Carga de la promesa (normalmente tareas asíncronas).
+
+    if ( /* evalúa condición */ ) {
+      resolve(`Éxito!`);
+    } else {
+      reject(`Fallo!`);
+    }
+  });
+}
+```
+
+Un ejemplo sencillo podría ser:
+
+```js
+const checkServer = (url) => {
+  return new Promise((resolve, reject) => {
+    fetch(url)
+      .then(response => resolve(`Estado del Servidor: ${response.status === 200 ? "OK" : "NOT OK"}`))
+      .catch(() => reject(`Error al localizar URL`));
+  });
+}
+
+checkServer(document.URL.toString())
+  .then(result => console.log(result))
+  .catch(e => console.log(e));
+```
+
+Las promesas son muy útiles para envolver antiguas APIs asíncronas que funcionan a través de *callbacks* puros. De esta forma podemos hacerlas funcionar via promesas:
+
+```js
+const delay = time => new Promise(resolveCallback => setTimeout(resolveCallback, time));
+
+delay(3000)
+  .then(() => console.log(`Este es un retardo de al menos 3 segundos`))
+  .catch(() => console.log(`Retardo fallido`));
+```
+
+#### Asincronía en Promesas
+Si tratásemos las promesas con la misma prioridad que el resto de mensajes asíncronos, retrasariamos innecesariamente la ejecución de sus *callbacks*. Podrían acabar *'perdiéndose'* entre otros mensajes en la cola de eventos, como por ejemplo mensajes de renderizado o eventos de usuario. Dado que las promesas suelen ser fruto de la interacción con importantes APIs asíncronas, y por tanto, son una parte importante de la que se sirve tu aplicación, no queremos que se retrasen. Es preferible darles una prioridad mayor. El estándar ECMAScript describe el uso de una cola especial, llamada ***cola de microtareas*** o ***microtask queue***, con una mayor prioridad dedicada a la gestión de *callbacks* de promesas.
+
+La idea detrás de una segunda cola de *alta prioridad* es que los *callbacks* de cada promesa se almacenen aquí, de modo que cuando un nuevo *tick* del bucle de eventos tenga lugar, esta cola prioritaria será atendida primero. Asi pues, nos aseguramos que los *callbacks* de las promesas se ejecutarán en un futuro, si, **pero lo antes posible**.
+
+Por este motivo, las trazas del siguiente ejemplo aparecen en un orden inesperado si sólo considerasemos una única cola:
+
+```js
+// LLamada asíncrona con callback puro.
+setTimeout(() => console.log("1"), 0);
+
+// LLamada asíncrona con promesa.
+Promise.resolve().then(() => console.log("2"));
+
+// 2
+// 1
+```
+El callback de la promesa `(() => console.log("2"))` tiene mayor prioridad que el *callback* del *setTimeout* gracias a la cola de microtareas, y por ello es procesado primero.
+
+### Generadores
+>**NOTA**: Considera esta sección como un pequeño inciso. Los generadores suponen material suficiente para ser estudiados en una guía aparte. Sin embargo, creemos importante dar una pequeña pincelada sobre generadores antes de introducir el siguiente patrón. El motivo es que el patrón *async* / *await* se sustenta en el concepto de generadores para gestionar las promesas de forma transparente al desarrollador. Veamos como es posible.
+
+Los generadores (funciones generadoras) son un **tipo especial de funciones** con una poderosa cualidad: son funciones de las que **se puede salir y volver a entrar**, manteniendo su contexto tal cual lo habíamos dejado. Es decir, son funciones cuya ejecución podemos **pausar**.
+
+Puedes imaginar un generador como un algoritmo en donde podemos definir puntos de pausa, de modo que al salir se puede devolver un valor, y al ponerlo en marcha de nuevo es posible pasar un argumento del exterior hacia el algoritmo. Por tanto, existe una comunicación dúplex entre una función generadora y su contexto exterior. El responsable de este comportamiento es la palabra clave *yield*. Un ejemplo sencillo de generador sería el siguiente:
+
+```js
+function* countThree() {
+  yield 1;
+  yield 2;
+  yield 3;
+}
+```
+Esta función cuenta hasta tres, devolviendo en cada pausa que marca *yield* el valor que tiene a la derecha. Es decir, en la primera iteración el valor 1, en la segunda el valor 2 y en la tercera el 3. Pero, ¿cómo controlamos el flujo de ejecución de un generador desde el exterior?
+
+#### Iteradores
+
+Los generadores se apoyan en objetos iteradores. Estos objetos permiten recorrer una secuencia o colección gracias a que mantienen un registro de su posición actual dentro de la secuencia. En la interfaz de un objeto iterable encontramos métodos como `.next()` que permiten avanzar al elemento siguiente. Los *arrays* o los mapas, por ejemplo, son iterables por naturaleza.
+
+Asi pues, cuando una función generadora retorna lo hace inmediatamente, sin ejecutarse, devolviendo un objeto iterable. Gracias a este iterable podemos iniciar la primera ejecución, y las sucesivas, llamando a `.next()` y haciendo que la ejecución avance hasta encontrar el siguiente *yield* en el generador.
+
+Ahora si, el ejemplo anterior podría ejecutarse del siguiente modo:
+
+```js
+function* countThree() {
+  yield 1;
+  yield 2;
+  yield 3;
+}
+
+const generator = countThree();
+generator.next(); // {value: 1, done: false}
+generator.next(); // {value: 2, done: false}
+generator.next(); // {value: 3, done: false}
+generator.next(); // {value: undefined, done: true}
+```
+Fíjate que el valor que devuelve cada llamada a `.next()` no es únicamente el valor retornado por *yield*, sino un objeto que se compone de dos propiedades: dicho valor de retorno y un *flag* booleano que indica si la secuencia se ha agotado.
+
+#### Entrada y Salida
+Veamos un ejemplo más elaborado con comunicación en ambos sentidos:
+
+```js
+function* famousNames() {
+  console.log(`Devuelvo "Luke"`);
+  let received = yield "Luke";
+  console.log(`Recibo "${received}" y devuelvo "Homer"`);
+  received = yield "Homer";
+  console.log(`Recibo "${received}" y devuelvo "Bugs"`);
+  received = yield "Bugs";
+  console.log(`Recibo "${received}"`)
+}
+
+const generator = famousNames();  
+let returned = generator.next();
+returned = generator.next(`${returned.value} Skywalker`);
+returned = generator.next(`${returned.value} Simpson`);
+returned = generator.next(`${returned.value} Bunny`);
+generator.next();
+
+// Devuelvo "Luke"
+// Recibo "Luke Skywalker" y devuelvo "Homer"
+// Recibo "Homer Simpson" y devuelvo "Bugs"
+// Recibo "Bugs Bunny"
+```
+Observa que la palabra clave yield desempeña una doble función. Determina que valor es devuelto, aquello que esté a su derecha, pero además sirve como *placeholder* para el argumento de entrada (que es pasado mediante el método `.next()`).
+
+#### Asincronía con generadores.
+Seguro que estás pensando que los generadores esconden alguna magia que los hace asíncronos. No te precipites, no es cierto. Los generadores son inherentemente síncronos. Cuando un generador se ejecuta, lo hace en *thread* princial, consume CPU como el resto de instrucciones de tu aplicación. Por tanto, lo que hemos visto hasta sobre generadores no comporta ningún patrón asíncrono, sino todo lo contrario, una forma de controlar un flujo de ejecución síncrono, esto es, iniciarlo y resumirlo bajo demanda.
+
+La clave reside en combinar los generadores con las promesas. El resultado es una herramienta tremendamente útil. Imagina que un generador devuelve una promesa en cada una de sus ejecuciones. Como se pausa con cada retorno, podríamos programarlo para "esperar" a dicha promesa y continuar una vez se haya resuelto. De este modo, **podríamos expresar de forma síncrona un flujo de código asíncrono**. Aunque vamos a omitir un ejemplo de implementación debido a la complejidad, esta es la base que se esconde en el siguiente patrón.
 
 ## Async / Await
 lorem
