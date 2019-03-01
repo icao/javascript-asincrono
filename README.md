@@ -420,7 +420,92 @@ Seguro que estás pensando que los generadores esconden alguna magia que los hac
 La clave reside en combinar los generadores con las promesas. El resultado es una herramienta tremendamente útil. Imagina que un generador devuelve una promesa en cada una de sus ejecuciones. Como se pausa con cada retorno, podríamos programarlo para "esperar" a dicha promesa y continuar una vez se haya resuelto. De este modo, **podríamos expresar de forma síncrona un flujo de código asíncrono**. Aunque vamos a omitir un ejemplo de implementación debido a la complejidad, esta es la base que se esconde en el siguiente patrón.
 
 ## Async / Await
-lorem
+Las promesas supusieron un gran salto en Javascript al introducir una mejora sustancial sobre los *callbacks* y un manejo más elegante de nuestras tareas asíncronas. Sin embargo, también pueden llegar a ser tediosas y verbosas a medida que se requieren más y más `.then()`. **Las palabras clave *async* y *await* surgieron para simplificar el manejo de las promesas**. Son puro azúcar para hacer las promesas más amigables, escribir código más sencillo, reducir el anidamiento y mejorar la trazabilidad al depurar. Pero recuerda, *async \ await* y las promesas son lo mismo en el fondo.
+
+La etiqueta *async* declara una función como asíncrona e indica que una promesa será automáticamente devuelta. Podemos declarar como *async* tanto funciones con nombre, anónimas, o funciones flecha. Por otro lado, *await* debe ser usado siempre dentro de una función declarada como *async* y esperará automáticamente (de forma asíncrona y no bloqueante) a que una promesa se resuelva.
+
+Mucho mejor si vemos un ejemplo:
+
+```js
+const checkServerWithSugar = async (url) => {
+  const response = await fetch(url);
+  return `Estado del Servidor: ${response.status === 200 ? "OK" : "NOT OK"}`;
+}
+
+checkServerWithSugar(document.URL.toString())
+  .then(result => console.log(result));
+```
+Compara este ejemplo con la versión original de *checkServer* que hemos visto en la sección Promesas. Son equivalentes, en esta nueva versión sin embargo, la sentencia *await* se encargará automáticamente de gestionar la promesa devuelta por *fetch*. Esta promesa es transparente a nosotros, pero está siendo configurada de modo que su *resolveCallback* equivale a las líneas de código que hay posteriores al *await* (en este caso solo dos, la asignación a response y la última línea con el *return*. Es decir, todo lo que queda por ejecutar en nuestra función *async* será usado como el *resolveCallbackde* la promesa del *fetch*. Esto es, el resto de nuestra función *async* se ejecutará asíncronamente una vez que la promesa del *fetch* se resuelva, sin necesidad de *callbacks*, con nuestro código escrito de forma secuencial. Casi magia.
+
+En la práctica, este comportamiento es equivalente a decir que el operador *await* *'pausa la ejecución'* o *'espera a una promesa'*. Probablemente hayas leído esta definición en algún sitio, pero cuidado con los matices, ya que sugiere la idea errónea de que *await* bloquea o espera de forma síncrona, y no, no lo hace.
+
+#### Manejo de Errores
+Si una promesa gestionada por *await* es rechazada o un error se dispara dentro de la función declarada como *async*, la promesa que automáticamente devuelve la función async también será rechazada. En este caso, podemos encadenar un `.catch()` para notificar el error:
+
+```js
+checkServerWithSugar(document.URL.toString())
+  .then(result => console.log(result))
+  .catch(e => console.log(`Error Capturado Fuera de la función async: ${e}`));
+```
+Pero si necesitáramos gestionar estos erroes internamente, en la propia función *async*, deberemos envolver nuestro código con un *try / catch* del siguiente modo:
+
+```js
+const checkServerWithSugar = async (url) => {
+  try {
+    const response = await fetch(url);
+    return `Estado del servidor: ${response.status === 200 ? "OK" : "NOT OK"}`;
+  } catch (e) {
+    throw `Manejo intero del error. Error original: ${e}`;
+  }
+}
+
+checkServerWithSugar(document.URL.toString())
+  .then(result => console.log(result))
+  .catch(e => console.log(`Error Capturado Fuera de la función async: ${e}`));
+```
+#### Multiples awaits
+Presta mucha atención cuando trabajes con múltiples promesas con el operador *await*. La mayoría de las veces querrás evitar apilar sentencias *await*, a menos que una dependa de la otra. Apilar múltiples *await* es equivalente a lanzar una promesa cuando la anterior haya sido resuelta. Es decir, ejecutar las promesas encadenadamente, de forma secuencial. Y esto no siempre es lo deseable.
+
+Mira el siguiente ejemplo:
+
+```js
+async function wait() {
+  await delay(500);
+  await delay(500);
+  return "Ha transcurrido, como mínimo, 1 segundo.";
+};
+```
+
+Solo cuando el primer `delay()` haya sido resuelto, se llamará al segundo `delay()`. Apilar varios *await* implica una espera síncrona entre ellos. Sin embargo, podemos hacer una espera en paralelo del siguiente modo:
+
+```js
+async function wait() {
+  const d1 = delay(500);
+  const d2 = delay(500);
+  await d1;
+  await d2;
+  return "Ha transcurrido, como mínimo, 500ms.";
+};
+```
+Es una solución mucho más interesante ya que ambas llamadas a `delay()` serán lanzadas, y una vez iniciadas nos quedamos a la espera de su resolución. De este modo, permitimos que las llamadas asíncronas a `delay()` sucedan de forma concurrente y progresen a la vez.
+
+¿Recuerdas cuando dijimos que *async / await* era puro azúcar sintáctico sobre promesas? Fíjate en esta equivalencia al ejemplo anterior:
+
+```js
+async function wait() {
+  const d1 = delay(500);
+  const d2 = delay(500);
+  await Promise.all([d1, d2]);
+  return "Ha transcurrido, como mínimo, 500ms.";
+};
+```
+Reemplazamos los dos *await* apilados por un `Promise.all()`, al que a su vez esperamos con un único *await* (recuerda que `Promise.all()` devuelve una promesa). De este modo eliminamos elegantemente el riesgo que conlleva usar múltiples *await* e incurrir en una espera secuencial no deseada.
+
+
+
+
+
+
 # Resumen
 
 lorem
