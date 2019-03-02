@@ -1,6 +1,6 @@
 # Javascript Asíncrono: La guía definitiva  
 
-**Nota:** Este repositorio esta basado en el post escrito por [Javier Calzado](https://lemoncode.net/lemoncode-blog/?author=5a6f02025e0ed86ac9148029) de [LEMON_CODE](https://lemoncode.net/lemoncode-blog/2018/1/29/javascript-asincrono) bajo el titular de "Javascript Asíncrono: La guía definitiva", con fin de dar a conocer a la comunidad por otro medio, los creditos le pertenecen al autor.
+**Nota:** Este repositorio esta contiene el articulo transcrito a *Markdown* del post escrito por [Javier Calzado](https://lemoncode.net/lemoncode-blog/?author=5a6f02025e0ed86ac9148029) de [LEMON_CODE](https://lemoncode.net/lemoncode-blog/2018/1/29/javascript-asincrono) bajo el titular de "Javascript Asíncrono: La guía definitiva", con fin de dar a conocer a la comunidad por otro medio, los creditos le pertenecen al autor.
 
  <p align="center">
     <img src="./src/images/header_es.png" alt="Javascript Asíncrono">
